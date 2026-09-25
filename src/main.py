@@ -1,52 +1,43 @@
 from Card import Card
 from Column import Column
 from typing import List
+from color import Color
 
 def show_board(board: List[Column]):
     for i in range(7):
         print(f'{board[0][i].__str__()}\t{board[1][i].__str__()}\t{board[2][i].__str__()}')
 
-def shuffle(board: List[Column], column):
+def ask_column() -> int:
+    while True:
+        answer = input("Choose a letter and say the column: ")
+        if answer in ('1', '2', '3'):
+            return int(answer)
+        print("Invalid column, type 1, 2 or 3.")
 
-    column_numbers = [1, 2, 3]
-    column_numbers.pop(column)
+def shuffle(board: List[Column], column: int) -> List[Column]:
+    chosen = column - 1
 
-    new_column_1 = Column(None)
-    new_column_2 = Column(None)
-    new_column_3 = Column(None)
+    order = [c for c in range(3) if c != chosen]
+    order.insert(1, chosen)
+    deck = [card for c in order for card in board[c]]
 
-    for i in range(0, 7, 3):
-        new_column_1.add_card(Card(board[column][i].change_position((i, 1))))
-        new_column_2.add_card(Card(board[column][i+1].change_position((i, 2))))
-        new_column_3.add_card(Card(board[column][i+2].change_position((i, 3))))
+    new_board = [Column(None) for _ in range(3)]
+    for i, card in enumerate(deck):
+        new_board[i % 3].add_card(card)
 
-    for c in column_numbers:
-        for i in range(0, 7, 3):
-            new_column_1.add_card(Card(board[c][i].change_position((i, 1))))
-            new_column_2.add_card(Card(board[c][i+1].change_position((i, 2))))
-            new_column_3.add_card(Card(board[c][i+2].change_position((i, 3))))
-
-    return [
-        new_column_1,
-        new_column_2,
-        new_column_3
-    ]
-    
-
-game = []
-for c in range(3):
-    game.append(Column([Card(chr(ord('A') + i), i, c+1) for i in range(0, 7)]))
-    game.append(Column([Card(chr(ord('H') + i), i, c + 2) for i in range(0, 7)]))
-    game.append(Column([Card(chr(ord('O') + i), i, c + 3) for i in range(0, 7)]))
+    return new_board
 
 
-show_board(game)
+game = [
+    Column([Card(chr(ord('A') + i), Color.RED) for i in range(0, 7)]),
+    Column([Card(chr(ord('H') + i), Color.GREEN) for i in range(0, 7)]),
+    Column([Card(chr(ord('O') + i), Color.MAGENTA) for i in range(0, 7)]),
+]
 
-choosed = int(input("Choose a number and say the column: "))
+for _ in range(3):
+    show_board(game)
+    choosed = ask_column()
+    game = shuffle(game, choosed)
+    print()
 
-game = shuffle(game, choosed)
-
-show_board(game)
-
-
-
+print(f'Your card was: {game[1][3]}')
